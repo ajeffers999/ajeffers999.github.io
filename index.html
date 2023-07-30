@@ -5,17 +5,32 @@
 </style>
 
 <html>
-    <head></head>
+    <head>
+        <script>
+            
+        </script>
+    </head>
 
     <body>
         <p>
-            First attempt at making a chart!
+            First attempt at making a chart!!!!!
         </p>
+        <p class="output"></p>
 
         <svg class="chart" width="120" height="500"></svg>
-
-        <script>
-            var data = [4, 8, 15, 16, 23, 42];
+        
+        <script>      
+            // async function initData() {
+            //     return data = await d3.csv('C:\Users\ajeff\Documents\SchoolWork\UIUC\CS416NarrativeVisualization\ajeffers999.github.io\vgsales.csv');
+            //     console.log(data);
+            // }      
+            // initData();
+            
+            const myData = await d3.csv("https://raw.githubusercontent.com/ajeffers999/ajeffers999.github.io/main/vgsales.csv");
+            // var data = [4, 8, 15, 16, 23, 42];
+            d3.select(".output").text(data)
+            console.log(data)
+            
             
             d3.select(".chart")
                 .selectAll("rect")
