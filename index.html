@@ -12,37 +12,48 @@
     </head>
 
     <body>
-        <p>
-            First attempt at making a chart!!!!!
-        </p>
+        <h3>
+            Interactive Slideshow of the top 50 Video Games in the World
+        </h3>
         <p class="output"></p>
+        
+        <svg class="chart"></svg>
 
-        <svg class="chart" width="500" height="500"></svg>
+        <button onclick="globalSales()"> Global Sales </button>
+        <button onclick="euSales()"> EU Sales </button>
         
         <script>      
-            // async function loadData() {
-            //     return await d3.csv('https://raw.githubusercontent.com/ajeffers999/ajeffers999.github.io/main/vgsales.csv');
-            // }      
+            
+            const width = 500;
+            const height = 300;
+            const margin = 25; 
 
-            async function init() {
+            async function globalSales() {
                 const data = await d3.csv('https://raw.githubusercontent.com/ajeffers999/ajeffers999.github.io/main/vgsales.csv');
+                
+                // const globalX = d3.scaleOrdinal().range([margin, 550]).domain(data.Name)
+                d3.select(".output").text("This is a chart displaying the Global Sales of the top 50 largest video games.");
 
                 d3.select(".chart")
+                    .attr("width", width + 2 * margin)
+                    .attr("height", height + 2 * margin)
+                    .append("g")
+                        .attr("transform", "translate(" + margin + "," + margin + ")")
                     .selectAll("rect")
-                    .data(data)
-                .enter().append("rect")
-                .attr("width", 4)
-                .attr("x", function(d, i) {return 5 * i;})
-                .attr("height", 20)
-                .attr("y", 400)
-                .transition()
-                .attr("height", function(d) {return 2 * d.Global_Sales;})
-                .attr("y", function(d) {return 420 - 2 * d.Global_Sales;})
+                        .data(data)
+                    .enter().append("rect")
+                        .attr("width", 9)
+                        .attr("x", function(d, i) {return 10 * i;})
+                        .attr("height", 20)
+                        .attr("y", 400)
+                    .transition()
+                        .attr("height", function(d) {return 3 * d.Global_Sales;})
+                        .attr("y", function(d) {return height - margin - 3 * d.Global_Sales;})
             }
 
+            
 
-
-            init();
+            globalSales();
 
         </script>
 
