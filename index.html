@@ -24,34 +24,50 @@
         
         <script>      
             
-            const width = 500;
+            const width = 733;
             const height = 300;
-            const margin = 25; 
+            const marginLeft = 80;
+            const marginTop = 50;
+            const marginBottom = 200;
 
             async function globalSales() {
                 const data = await d3.csv('https://raw.githubusercontent.com/ajeffers999/ajeffers999.github.io/main/vgsales.csv');
-                
-                // const globalX = d3.scaleOrdinal().range([margin, 550]).domain(data.Name)
-                d3.select(".output").text("This is a chart displaying the Global Sales of the top 50 largest video games.");
+                const names = data.map((d, i) => i + "-" + d.Name)
+                // const names1 = tempNames.map((d) => d.split("-")[1]);
 
+                var x = d3.scaleBand().domain(names).range([0,width]);
+                var y = d3.scaleLinear().domain([0, 100]).range([height, 0])
+                // d3.select(".output").text("This is a chart displaying the Global Sales of the top 50 largest video games.");
                 d3.select(".chart")
-                    .attr("width", width + 2 * margin)
-                    .attr("height", height + 2 * margin)
+                    .attr("width", width + 2 * marginLeft)
+                    .attr("height", height + marginTop + marginBottom)
                     .append("g")
-                        .attr("transform", "translate(" + margin + "," + margin + ")")
+                        .attr("transform", "translate(" + marginLeft + "," + marginTop + ")")
                     .selectAll("rect")
                         .data(data)
                     .enter().append("rect")
-                        .attr("width", 9)
-                        .attr("x", function(d, i) {return 10 * i;})
-                        .attr("height", 20)
-                        .attr("y", 400)
+                        .attr("width", 14)
+                        .attr("x", function(d, i) {return 15 * i;})
+                        .attr("y", height)
                     .transition()
                         .attr("height", function(d) {return 3 * d.Global_Sales;})
-                        .attr("y", function(d) {return height - margin - 3 * d.Global_Sales;})
-            }
+                        .attr("y", function(d) {return (height) - 3 * d.Global_Sales;})
 
-            
+                d3.select(".chart")
+                    .append("g")
+                        .attr("transform", "translate(" + marginLeft + "," + (height + marginTop) + ")")
+                        .call(d3.axisBottom(x))
+                        .selectAll("text")
+                            .style("text-anchor", "end")
+                            .attr("dx", "-.8em")
+                            .attr("dy", "0em")
+                            .attr("transform", "rotate(-65)")
+                
+                d3.select(".chart")
+                    .append("g")
+                        .attr("transform", "translate(" + marginLeft + "," + marginTop + ")")
+                        .call(d3.axisLeft(y))
+            }
 
             globalSales();
 
