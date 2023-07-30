@@ -17,32 +17,32 @@
         </p>
         <p class="output"></p>
 
-        <svg class="chart" width="120" height="500"></svg>
+        <svg class="chart" width="500" height="500"></svg>
         
         <script>      
-            // async function initData() {
-            //     return data = await d3.csv('C:\Users\ajeff\Documents\SchoolWork\UIUC\CS416NarrativeVisualization\ajeffers999.github.io\vgsales.csv');
-            //     console.log(data);
+            // async function loadData() {
+            //     return await d3.csv('https://raw.githubusercontent.com/ajeffers999/ajeffers999.github.io/main/vgsales.csv');
             // }      
-            // initData();
-            
-            const myData = await d3.csv("https://raw.githubusercontent.com/ajeffers999/ajeffers999.github.io/main/vgsales.csv");
-            // var data = [4, 8, 15, 16, 23, 42];
-            d3.select(".output").text(data)
-            console.log(data)
-            
-            
-            d3.select(".chart")
-                .selectAll("rect")
-                .data(data)
-            .enter().append("rect")
-            .attr("width", 19)
-            .attr("x", function(d, i) {return 20 * i;})
-            .attr("height", 20)
-            .attr("y", 400)
-            .transition()
-            .attr("height", function(d) {return 10 * d;})
-            .attr("y", function(d) {return 420 - 10*d;})
+
+            async function init() {
+                const data = await d3.csv('https://raw.githubusercontent.com/ajeffers999/ajeffers999.github.io/main/vgsales.csv');
+
+                d3.select(".chart")
+                    .selectAll("rect")
+                    .data(data)
+                .enter().append("rect")
+                .attr("width", 4)
+                .attr("x", function(d, i) {return 5 * i;})
+                .attr("height", 20)
+                .attr("y", 400)
+                .transition()
+                .attr("height", function(d) {return 2 * d.Global_Sales;})
+                .attr("y", function(d) {return 420 - 2 * d.Global_Sales;})
+            }
+
+
+
+            init();
 
         </script>
 
