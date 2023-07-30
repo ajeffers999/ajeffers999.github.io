@@ -12,32 +12,77 @@
     </head>
 
     <body>
-        <h3>
+        <h1 class="title">
             Interactive Slideshow of the top 50 Video Games in the World
-        </h3>
+        </h1>
+
+        <h3 class="chart_title">Sales Information</h3>
+
         <p class="output"></p>
+
+        <div class="tooltip"></div>
         
         <svg class="chart"></svg>
 
         <button onclick="globalSales()"> Global Sales </button>
         <button onclick="euSales()"> EU Sales </button>
+        <button onclick="naSales()"> NA Sales </button>
         
         <script>      
             
-            const width = 733;
+            const width = 750;
             const height = 300;
             const marginLeft = 80;
             const marginTop = 50;
-            const marginBottom = 200;
+            const marginBottom = 250;
+            var currentScene = "";
+
+            var tooltip = d3.select(".tooltip")
+                .style("opacity", 0)
+                .style("background-color", "white")
+                .style("border", "solid")
+                .style("border-width", "2px")
+                .style("border-radius", "5px")
+                .style("padding", "5px")
+                .style("position", "absolute")
+            
+            var tooltipMouseover = function(d) {
+                tooltip.style("opacity", 1)
+                d3.select(this)
+                    .style("fill", "lightblue")
+            }
+
+            var tooltipMousemove = function(event, d) {
+                const [x, y] = d3.pointer(event)
+                tooltip.style("transform", "translate(" + (x + 15) + "px," + (y - 15) + "px)")
+                
+                if (currentScene == "Global_Sales") {
+                    tooltip.html(d.Name + "<br>Global Sales:" + d.Global_Sales)
+                } else if (currentScene == "EU_Sales") {
+                    tooltip.html(d.Name + "<br>EU Sales:" + d.EU_Sales)
+                } else if (currentScene == "NA_Sales") {
+                    tooltip.html(d.Name + "<br>NA Sales:" + d.NA_Sales)
+                }
+            }
+
+            var tooltipMouseleave = function(d) {
+                tooltip.style("opacity", 0)
+                d3.select(this)
+                    .style("fill", "steelblue")
+            }
 
             async function globalSales() {
+                currentScene = "Global_Sales";
+
                 const data = await d3.csv('https://raw.githubusercontent.com/ajeffers999/ajeffers999.github.io/main/vgsales.csv');
-                const names = data.map((d, i) => i + "-" + d.Name)
-                // const names1 = tempNames.map((d) => d.split("-")[1]);
+                const names = data.map((d, i) => (i + 1) + " - " + d.Name)
 
                 var x = d3.scaleBand().domain(names).range([0,width]);
                 var y = d3.scaleLinear().domain([0, 100]).range([height, 0])
-                // d3.select(".output").text("This is a chart displaying the Global Sales of the top 50 largest video games.");
+                
+                d3.select(".chart").selectAll("*").remove()
+                
+                d3.select(".output").text("This is a chart displaying the Global Sales of the top 50 largest video games.");
                 d3.select(".chart")
                     .attr("width", width + 2 * marginLeft)
                     .attr("height", height + marginTop + marginBottom)
@@ -49,9 +94,104 @@
                         .attr("width", 14)
                         .attr("x", function(d, i) {return 15 * i;})
                         .attr("y", height)
+                        .on("mouseover", tooltipMouseover)
+                        .on("mousemove", tooltipMousemove)
+                        .on("mouseleave", tooltipMouseleave)
                     .transition()
                         .attr("height", function(d) {return 3 * d.Global_Sales;})
                         .attr("y", function(d) {return (height) - 3 * d.Global_Sales;})
+
+                d3.select(".chart")
+                    .append("g")
+                        .attr("transform", "translate(" + marginLeft + "," + (height + marginTop) + ")")
+                        .call(d3.axisBottom(x))
+                        .selectAll("text")
+                            .style("text-anchor", "end")
+                            .attr("dx", "-.8em")
+                            .attr("dy", "0em")
+                            .attr("transform", "rotate(-65)")
+                
+                d3.select(".chart")
+                    .append("g")
+                        .attr("transform", "translate(" + marginLeft + "," + marginTop + ")")
+                        .call(d3.axisLeft(y))
+            }
+
+            async function euSales() {
+                currentScene = "EU_Sales";
+
+                const data = await d3.csv('https://raw.githubusercontent.com/ajeffers999/ajeffers999.github.io/main/vgsales.csv');
+                const names = data.map((d, i) => (i + 1) + " - " + d.Name)
+
+                var x = d3.scaleBand().domain(names).range([0,width]);
+                var y = d3.scaleLinear().domain([0, 30]).range([height, 0])
+                d3.select(".output").text("This is a chart displaying the European Sales of the top 50 largest video games.");
+                
+                d3.select(".chart").selectAll("*").remove()
+                
+                d3.select(".chart")
+                    .attr("width", width + 2 * marginLeft)
+                    .attr("height", height + marginTop + marginBottom)
+                    .append("g")
+                        .attr("transform", "translate(" + marginLeft + "," + marginTop + ")")
+                    .selectAll("rect")
+                        .data(data)
+                    .enter().append("rect")
+                        .attr("width", 14)
+                        .attr("x", function(d, i) {return 15 * i;})
+                        .attr("y", height)
+                        .on("mouseover", tooltipMouseover)
+                        .on("mousemove", tooltipMousemove)
+                        .on("mouseleave", tooltipMouseleave)
+                    .transition()
+                        .attr("height", function(d) {return 10 * d.EU_Sales;})
+                        .attr("y", function(d) {return (height) - 10 * d.EU_Sales;})
+
+                d3.select(".chart")
+                    .append("g")
+                        .attr("transform", "translate(" + marginLeft + "," + (height + marginTop) + ")")
+                        .call(d3.axisBottom(x))
+                        .selectAll("text")
+                            .style("text-anchor", "end")
+                            .attr("dx", "-.8em")
+                            .attr("dy", "0em")
+                            .attr("transform", "rotate(-65)")
+                
+                d3.select(".chart")
+                    .append("g")
+                        .attr("transform", "translate(" + marginLeft + "," + marginTop + ")")
+                        .call(d3.axisLeft(y))
+            }
+
+            async function naSales() {
+                currentScene = "NA_Sales";
+
+                const data = await d3.csv('https://raw.githubusercontent.com/ajeffers999/ajeffers999.github.io/main/vgsales.csv');
+                const names = data.map((d, i) => (i + 1) + " - " + d.Name)
+
+                var x = d3.scaleBand().domain(names).range([0,width]);
+                var y = d3.scaleLinear().domain([0, 45]).range([height, 0])
+                d3.select(".output").text("This is a chart displaying the North American Sales of the top 50 largest video games.");
+                
+                d3.select(".chart").selectAll("*").remove()
+                
+                d3.select(".chart")
+                    .attr("width", width + 2 * marginLeft)
+                    .attr("height", height + marginTop + marginBottom)
+                    .append("g")
+                        .attr("transform", "translate(" + marginLeft + "," + marginTop + ")")
+                    .selectAll("rect")
+                        .data(data)
+                    .enter().append("rect")
+                        .attr("width", 14)
+                        .attr("x", function(d, i) {return 15 * i;})
+                        .attr("y", height)
+                        .on("mouseover", tooltipMouseover)
+                        .on("mousemove", tooltipMousemove)
+                        .on("mouseleave", tooltipMouseleave)
+                    .transition()
+                        .attr("height", function(d) {return 6.6 * d.NA_Sales;})
+                        .attr("y", function(d) {return (height) - 6.6 * d.NA_Sales;})
 
                 d3.select(".chart")
                     .append("g")
