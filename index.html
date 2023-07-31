@@ -1,4 +1,5 @@
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-annotation/2.5.1/d3-annotation.min.js" integrity="sha512-iBAeBWWWFb8HqSBcrqcz98iIpuVH1la39dEYHtyQ/pGpeCQTQVvLJOWAuhv2Q7JSHp9k7hWA7sGxU3hHJe+tFg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <style>
     .chart rect { fill: steelblue }    
@@ -13,10 +14,8 @@
 
     <body>
         <h1 class="title">
-            Interactive Slideshow of the top 50 Video Games in the World
+            Drill Down Story of the top 50 Video Games in the World
         </h1>
-
-        <h3 class="chart_title">Sales Information</h3>
 
         <p class="output"></p>
 
@@ -24,18 +23,89 @@
         
         <svg class="chart"></svg>
 
-        <button onclick="globalSales()"> Global Sales </button>
-        <button onclick="euSales()"> EU Sales </button>
-        <button onclick="naSales()"> NA Sales </button>
+        <br/>
+        <div class="sales_buttons">
+            <h5>Sales Charts</h5>
+
+            <button onclick="globalSales()"> Global Sales </button>
+            <button onclick="euSales()"> EU Sales </button>
+            <button onclick="naSales()"> NA Sales </button>
+        </div>
+
+        <div class="genre_buttons" style="display:none">
+            <h5>Sales Charts</h5>
+
+            <button onclick="globalSales()"> Global Sales </button>
+            <button onclick="euSales()"> EU Sales </button>
+            <button onclick="naSales()"> NA Sales </button>
+        </div>
         
+        <br/>
+
+        <div id="publisher-selector">
+            <h5>Publishers</h5>
+            <select id="publishers">
+                <option value="all">All</option>
+                <option value="nintendo">Nintendo</option>
+                <option value="microsoft">Microsoft Game Studios</option>
+                <option value="take-two">Take-Two Interactive</option>
+                <option value="sony">Sony Computer Entertainment</option>
+                <option value="activision">Activision</option>
+            </select>
+        </div>
+        
+
+        <div id="platform-selector" style="display:none"> 
+            <h5>Platform</h5>
+            <select id="platforms">
+                <option value="all">All</option>
+                <option value="wii">Wii</option>
+                <option value="nes">NES</option>
+                <option value="gb">Gameboy</option>
+                <option value="ds">DS</option>
+                <option value="x">XBox</option>
+                <option value="ps">Playstation</option>
+            </select>
+        </div>
+
+        <div id="genre-selector" style="display:none"> 
+            <h5>Genre</h5>
+            <select id="genres">
+                <option value="all">All</option>
+                <option value="sports">Sports</option>
+                <option value="platform">Platform</option>
+                <option value="racing">Racing</option>
+                <option value="role-playing">Role-Playing</option>
+                <option value="puzzle">Puzzle</option>
+                <option value="shooter">Shooter</option>
+                <option value="simulation">Simulation</option>
+                <option value="action">Action</option>
+                <option value="fighting">Fighting</option>
+                <option value="misc">Misc</option>
+            </select>
+        </div>
+        
+        <br/>
+        
+        <div class="scene_buttons">
+            <h5>Scene Selection</h5>
+
+            <button onclick="publisherScene()"> Publishers </button>
+            <button onclick="platformScene()"> Platform </button>
+            <button onclick="genreScene()"> Genre </button>
+        </div>
+
+        <br/>
+
         <script>      
             
             const width = 750;
             const height = 300;
             const marginLeft = 80;
-            const marginTop = 50;
+            const marginTop = 100;
             const marginBottom = 250;
-            var currentScene = "";
+            var currentSales = "";
+            var currentScene = "publisher"
 
             var tooltip = d3.select(".tooltip")
                 .style("opacity", 0)
@@ -45,7 +115,144 @@
                 .style("border-radius", "5px")
                 .style("padding", "5px")
                 .style("position", "absolute")
+
+            document.getElementById("publishers").addEventListener("change", reloadGraph, false)
+            document.getElementById("platforms").addEventListener("change", reloadGraph, false)
+            document.getElementById("genres").addEventListener("change", reloadGraph, false)
+
+            const wiiSportsAnnotation = d3.annotationLabel
+            const annotations = [{
+                note: {
+                    label: "Wii Sports is far ahead of all other games regarding units sold.",
+                    bgPadding: 0,
+                    title: "Wii Sports"
+                },
+                //can use x, y directly instead of data
+                className: "show-bg",
+                dy: -20,
+                dx: 200,
+                x: 90,
+                y: 200
+            }]
+
+            const superMarioBrosAnnotation = d3.annotationLabel
+            const SMBannotations = [{
+                note: {
+                    label: "A large component of Super Mario Bros. sales comes from NA.",
+                    bgPadding: 0,
+                    title: "Super Mario Bros."
+                },
+                //can use x, y directly instead of data
+                className: "show-bg",
+                dy: -40,
+                dx: 200,
+                x: 100,
+                y: 250
+            }]
+
+            function reloadGraph() {
+                if (currentSales == "Global_Sales") {
+                    globalSales()
+                } else if (currentSales == "EU_Sales") {
+                    euSales()
+                } else if (currentSales == "NA_Sales") {
+                    naSales()
+                }
+            }
+
+            function publisherScene() {
+                document.getElementById("publisher-selector").setAttribute("style", "display:block")
+                document.getElementById("platform-selector").setAttribute("style", "display:none")
+                document.getElementById("genre-selector").setAttribute("style", "display:none")
+                document.getElementById("genres").value = "all"
+                document.getElementById("platforms").value = "all"
+
+                currentScene = "publisher"
+                reloadGraph()
+            }
+
+            function platformScene() {
+                document.getElementById("publisher-selector").setAttribute("style", "display:none")
+                document.getElementById("platform-selector").setAttribute("style", "display:block")
+                document.getElementById("genre-selector").setAttribute("style", "display:none")
+                document.getElementById("publishers").value = "all"
+                document.getElementById("genres").value = "all"
+
+                currentScene = "platform"
+                reloadGraph()
+            }
+
+            function genreScene() {
+                document.getElementById("publisher-selector").setAttribute("style", "display:none")
+                document.getElementById("platform-selector").setAttribute("style", "display:none")
+                document.getElementById("genre-selector").setAttribute("style", "display:block")
+                document.getElementById("publishers").value = "all"
+                document.getElementById("platforms").value = "all"
+
+                currentScene = "genre"
+                reloadGraph()
+            }
+
+            function getPublisherData(data, publisherValue) {
+                if (publisherValue == "all") {
+                    return data;
+                } else if (publisherValue == "nintendo") {
+                    return data.filter((d) => d.Publisher == "Nintendo")
+                } else if (publisherValue == "microsoft") {
+                    return data.filter((d) => d.Publisher == "Microsoft Game Studios")
+                } else if (publisherValue == "take-two") {
+                    return data.filter((d) => d.Publisher == "Take-Two Interactive")
+                } else if (publisherValue == "sony") {
+                    return data.filter((d) => d.Publisher == "Sony Computer Entertainment")
+                } else if (publisherValue == "activision") {
+                    return data.filter((d) => d.Publisher == "Activision")
+                }
+            }
+
+            function getPlatformData(data, platformValue) {
+                if (platformValue == "all") {
+                    return data;
+                } else if (platformValue == "wii") {
+                    return data.filter((d) => d.Platform == "Wii")
+                } else if (platformValue == "nes") {
+                    return data.filter((d) => d.Platform == "NES" || d.Platform == "SNES")
+                } else if (platformValue == "gb") {
+                    return data.filter((d) => d.Platform == "GB" || d.Platform == "GBA")
+                } else if (platformValue == "ds") {
+                    return data.filter((d) => d.Platform == "DS" || d.Platform == "3DS")
+                } else if (platformValue == "xbox") {
+                    return data.filter((d) => d.Platform == "X360")
+                } else if (platformValue == "ps") {
+                    return data.filter((d) => d.Platform == "PS2" || d.Platform == "PS3" || d.Platform == "PS4")
+                }
+            }
             
+            function getGenreData(data, genreValue) {
+                if (genreValue == "all") {
+                    return data;
+                } else if (genreValue == "sports") {
+                    return data.filter((d) => d.Genre == "Sports")
+                } else if (genreValue == "platform") {
+                    return data.filter((d) => d.Genre == "Platform")
+                } else if (genreValue == "racing") {
+                    return data.filter((d) => d.Genre == "Racing")
+                } else if (genreValue == "role-playing") {
+                    return data.filter((d) => d.Genre == "Role-Playing")
+                } else if (genreValue == "puzzle") {
+                    return data.filter((d) => d.Genre == "Puzzle")
+                } else if (genreValue == "shooter") {
+                    return data.filter((d) => d.Genre == "Shooter")
+                } else if (genreValue == "simulation") {
+                    return data.filter((d) => d.Genre == "Simulation")
+                } else if (genreValue == "action") {
+                    return data.filter((d) => d.Genre == "Action")
+                } else if (genreValue == "fighting") {
+                    return data.filter((d) => d.Genre == "Fighting")
+                } else if (genreValue == "misc") {
+                    return data.filter((d) => d.Genre == "Misc")
+                }
+            }
+
             var tooltipMouseover = function(d) {
                 tooltip.style("opacity", 1)
                 d3.select(this)
@@ -54,14 +261,14 @@
 
             var tooltipMousemove = function(event, d) {
                 const [x, y] = d3.pointer(event)
-                tooltip.style("transform", "translate(" + (x + 15) + "px," + (y - 15) + "px)")
+                tooltip.style("transform", "translate(" + (x + 15) + "px," + (y - 35) + "px)")
                 
-                if (currentScene == "Global_Sales") {
-                    tooltip.html(d.Name + "<br>Global Sales:" + d.Global_Sales)
-                } else if (currentScene == "EU_Sales") {
-                    tooltip.html(d.Name + "<br>EU Sales:" + d.EU_Sales)
-                } else if (currentScene == "NA_Sales") {
-                    tooltip.html(d.Name + "<br>NA Sales:" + d.NA_Sales)
+                if (currentSales == "Global_Sales") {
+                    tooltip.html(d.Name + "<br>Year: " + d.Year + "<br>Global Sales: " + d.Global_Sales)
+                } else if (currentSales == "EU_Sales") {
+                    tooltip.html(d.Name + "<br>Year: " + d.Year + "<br>EU Sales: " + d.EU_Sales)
+                } else if (currentSales == "NA_Sales") {
+                    tooltip.html(d.Name + "<br>Year: " + d.Year + "<br>NA Sales: " + d.NA_Sales)
                 }
             }
 
@@ -72,17 +279,40 @@
             }
 
             async function globalSales() {
-                currentScene = "Global_Sales";
+                currentSales = "Global_Sales";
 
-                const data = await d3.csv('https://raw.githubusercontent.com/ajeffers999/ajeffers999.github.io/main/vgsales.csv');
+                var publisher = document.getElementById("publishers");
+                var platform = document.getElementById("platforms");
+                var genre = document.getElementById("genres");
+
+                var data = await d3.csv('https://raw.githubusercontent.com/ajeffers999/ajeffers999.github.io/main/vgsales.csv');
+                data = getPublisherData(data, publisher.value)
+                data = getPlatformData(data, platform.value)
+                data = getGenreData(data, genre.value)
+
                 const names = data.map((d, i) => (i + 1) + " - " + d.Name)
 
-                var x = d3.scaleBand().domain(names).range([0,width]);
+                var x = d3.scaleBand().domain(names).range([0,15 * names.length]);
                 var y = d3.scaleLinear().domain([0, 100]).range([height, 0])
+
+                const makeAnnotations = d3.annotation()
+                    .notePadding(10)
+                    .type(wiiSportsAnnotation)
+                    .annotations(annotations)
                 
                 d3.select(".chart").selectAll("*").remove()
+
+                var filterString = "";
+
+                if (currentScene == "publisher") {
+                    filterString = "Publisher: " + publisher.options[publisher.selectedIndex].text
+                } else if (currentScene == "platform") {
+                    filterString = "Platform: " + platform.options[platform.selectedIndex].text
+                } else if (currentScene == "genre") {
+                    filterString = "Genre: " + genre.options[genre.selectedIndex].text
+                }
                 
-                d3.select(".output").text("This is a chart displaying the Global Sales of the top 50 largest video games.");
+                d3.select(".output").html("This is a chart displaying the Global Sales of the top 50 games in the world with the following filter:<br>" + filterString);
                 d3.select(".chart")
                     .attr("width", width + 2 * marginLeft)
                     .attr("height", height + marginTop + marginBottom)
@@ -100,6 +330,14 @@
                     .transition()
                         .attr("height", function(d) {return 3 * d.Global_Sales;})
                         .attr("y", function(d) {return (height) - 3 * d.Global_Sales;})
+                
+                if (publisher == "all" && platform == "all" && genre == "all") {
+                    d3.select(".chart")
+                    .append("g")
+                    .attr("class", "annotation-group")
+                    .call(makeAnnotations)
+                }
+                
 
                 d3.select(".chart")
                     .append("g")
@@ -118,14 +356,32 @@
             }
 
             async function euSales() {
-                currentScene = "EU_Sales";
+                currentSales = "EU_Sales";
 
-                const data = await d3.csv('https://raw.githubusercontent.com/ajeffers999/ajeffers999.github.io/main/vgsales.csv');
+                var publisher = document.getElementById("publishers");
+                var platform = document.getElementById("platforms");
+                var genre = document.getElementById("genres");
+
+                var data = await d3.csv('https://raw.githubusercontent.com/ajeffers999/ajeffers999.github.io/main/vgsales.csv');
+                data = getPublisherData(data, publisher.value)
+                data = getPlatformData(data, platform.value)
+                data = getGenreData(data, genre.value)
+
                 const names = data.map((d, i) => (i + 1) + " - " + d.Name)
 
-                var x = d3.scaleBand().domain(names).range([0,width]);
+                var x = d3.scaleBand().domain(names).range([0,15 * names.length]);
                 var y = d3.scaleLinear().domain([0, 30]).range([height, 0])
                 d3.select(".output").text("This is a chart displaying the European Sales of the top 50 largest video games.");
+
+                if (currentScene == "publisher") {
+                    filterString = "Publisher: " + publisher.options[publisher.selectedIndex].text
+                } else if (currentScene == "platform") {
+                    filterString = "Platform: " + platform.options[platform.selectedIndex].text
+                } else if (currentScene == "genre") {
+                    filterString = "Genre: " + genre.options[genre.selectedIndex].text
+                }
+                
+                d3.select(".output").html("This is a chart displaying the EU Sales of the top 50 games in the world with the following filter:<br>" + filterString);
                 
                 d3.select(".chart").selectAll("*").remove()
                 
@@ -164,14 +420,36 @@
             }
 
             async function naSales() {
-                currentScene = "NA_Sales";
+                currentSales = "NA_Sales";
 
-                const data = await d3.csv('https://raw.githubusercontent.com/ajeffers999/ajeffers999.github.io/main/vgsales.csv');
+                var publisher = document.getElementById("publishers");
+                var platform = document.getElementById("platforms");
+                var genre = document.getElementById("genres");
+
+                var data = await d3.csv('https://raw.githubusercontent.com/ajeffers999/ajeffers999.github.io/main/vgsales.csv');
+                data = getPublisherData(data, publisher.value)
+                data = getPlatformData(data, platform.value)
+                data = getGenreData(data, genre.value)
+
                 const names = data.map((d, i) => (i + 1) + " - " + d.Name)
 
-                var x = d3.scaleBand().domain(names).range([0,width]);
+                const makeAnnotations = d3.annotation()
+                    .notePadding(10)
+                    .type(superMarioBrosAnnotation)
+                    .annotations(SMBannotations)
+
+                var x = d3.scaleBand().domain(names).range([0,15 * names.length]);
                 var y = d3.scaleLinear().domain([0, 45]).range([height, 0])
-                d3.select(".output").text("This is a chart displaying the North American Sales of the top 50 largest video games.");
+                
+                if (currentScene == "publisher") {
+                    filterString = "Publisher: " + publisher.options[publisher.selectedIndex].text
+                } else if (currentScene == "platform") {
+                    filterString = "Platform: " + platform.options[platform.selectedIndex].text
+                } else if (currentScene == "genre") {
+                    filterString = "Genre: " + genre.options[genre.selectedIndex].text
+                }
+                
+                d3.select(".output").html("This is a chart displaying the NA Sales of the top 50 games in the world with the following filter:<br>" + filterString);
                 
                 d3.select(".chart").selectAll("*").remove()
                 
@@ -192,6 +470,13 @@
                     .transition()
                         .attr("height", function(d) {return 6.6 * d.NA_Sales;})
                         .attr("y", function(d) {return (height) - 6.6 * d.NA_Sales;})
+
+                if (publisher == "all" && platform == "all" && genre == "all") {
+                    d3.select(".chart")
+                    .append("g")
+                    .attr("class", "annotation-group")
+                    .call(makeAnnotations)
+                }
 
                 d3.select(".chart")
                     .append("g")
