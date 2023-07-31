@@ -331,7 +331,7 @@
                         .attr("height", function(d) {return 3 * d.Global_Sales;})
                         .attr("y", function(d) {return (height) - 3 * d.Global_Sales;})
                 
-                if (publisher == "all" && platform == "all" && genre == "all") {
+                if (publisher.value == "all" && platform.value == "all" && genre.value == "all") {
                     d3.select(".chart")
                     .append("g")
                     .attr("class", "annotation-group")
@@ -471,7 +471,7 @@
                         .attr("height", function(d) {return 6.6 * d.NA_Sales;})
                         .attr("y", function(d) {return (height) - 6.6 * d.NA_Sales;})
 
-                if (publisher == "all" && platform == "all" && genre == "all") {
+                if (publisher.value == "all" && platform.value == "all" && genre.value == "all") {
                     d3.select(".chart")
                     .append("g")
                     .attr("class", "annotation-group")
